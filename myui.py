@@ -18,6 +18,80 @@ import lcddriver
 import matrixdriver
 
 
+class screen :
+
+    indicator = False
+
+    def __init__(self):
+        self.lcd = lcddriver.lcd()
+        self.lcd.lcd_clear()
+        self.lcd.lcd_display_string("                    ", 1)
+        self.lcd.lcd_display_string("  *** PI ALARM ***  ", 2)
+        self.lcd.lcd_display_string("", 3)
+        self.lcd.lcd_display_string("(c) BARTHELEMY      ", 4)
+        sleep(5)
+
+    def page0(self):
+        self.str = "                    "
+        self.lcd.lcd_display_string(self.str, 1)
+        self.lcd.lcd_display_string(self.str, 2)
+        self.lcd.lcd_display_string(self.str, 3)
+        self.lcd.lcd_display_string(self.str, 4)
+    
+    def page1(self,state=0,operator="None",menu=False,delay=0) : 
+        self.str1 = operator.ljust(19)
+        self.indicator ^= True
+        if self.indicator : 
+            self.str1 += "-"
+        else :
+            self.str1 += "|"
+        self.str3 = "                    "
+        if state == 0 :
+            self.str2 = "** DISARMED **".center(20)
+        elif state == 1 :
+            self.str2 = "** DELAYED ARMED **".center(20)
+            self.str3 = str(delay).center(20)
+        elif state == 2 :
+            self.str2 = "** ARMED **".center(20)
+        elif state == 3 :
+            self.str2 = "** DELAYED DETECTION **".center(20)
+            self.str3 = str(delay).center(20)
+        elif state == 4 :
+            self.str2 = "** DETECTION **".center(20)
+        else :
+            self.str2 = "** ERROR **".center(20)    
+        if (menu == True) : 
+            self.str4 = " 2 /24 8 /25"
+        else :
+            self.str4 = "* Menu              "
+        self.lcd.lcd_display_string(self.str1, 1)
+        self.lcd.lcd_display_string(self.str2, 2)
+        self.lcd.lcd_display_string(self.str3, 3)
+        self.lcd.lcd_display_string(self.str4, 4)
+
+    def page2(self):
+        self.str = "                    "
+        self.lcd.lcd_display_string(self.str, 1)
+        self.lcd.lcd_display_string(self.str, 2)
+        self.lcd.lcd_display_string(self.str, 3)
+        self.lcd.lcd_display_string(self.str, 4)
+
+    def page3(self):
+        self.str = "                    "
+        self.lcd.lcd_display_string(self.str, 1)
+        self.lcd.lcd_display_string(self.str, 2)
+        self.lcd.lcd_display_string(self.str, 3)
+        self.lcd.lcd_display_string(self.str, 4)
+
+    def page4(self):
+        self.str = "                    "
+        self.lcd.lcd_display_string(self.str, 1)
+        self.lcd.lcd_display_string(self.str, 2)
+        self.lcd.lcd_display_string(self.str, 3)
+        self.lcd.lcd_display_string(self.str, 4)
+
+
+
 class led :
 
     def __init__(self):
@@ -27,12 +101,6 @@ class led :
         gpio.init()
         gpio.setcfg(self._led, gpio.OUTPUT)
         self.matrix = matrixdriver.matrix()
-        self.lcd = lcddriver.lcd()
-        self.lcd.lcd_clear()
-        self.lcd.lcd_display_string("                    ", 1)
-        self.lcd.lcd_display_string("  *** PI ALARM ***  ", 2)
-        self.lcd.lcd_display_string("", 3)
-        self.lcd.lcd_display_string("(c) BARTHELEMY      ", 4)
     
     def start(self):
         self._loop = True 
@@ -62,7 +130,6 @@ class led :
                 sleep(0.1)
                 gpio.output(self._led, 0)
                 sleep(0.1)
-
                 gpio.output(self._led, 1)
                 sleep(0.1)
                 gpio.output(self._led, 0)
