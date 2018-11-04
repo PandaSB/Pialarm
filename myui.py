@@ -54,10 +54,10 @@ class screen :
         elif state == 2 :
             self.str2 = "** ARMED **".center(20)
         elif state == 3 :
-            self.str2 = "** DELAYED DETECTION **".center(20)
+            self.str2 = "** DETECTION **".center(20)
             self.str3 = str(delay).center(20)
         elif state == 4 :
-            self.str2 = "** DETECTION **".center(20)
+            self.str2 = "** ALARM ON **".center(20)
         else :
             self.str2 = "** ERROR **".center(20)    
         if (menu == True) : 

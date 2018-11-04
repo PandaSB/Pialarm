@@ -74,7 +74,6 @@ class matrix:
                 self.key = '9'
             if (self.data & MATRIX_LINE4 ) == 0 :
                 self.key = '#'
-
         return self.key
 
 

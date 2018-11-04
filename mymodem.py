@@ -16,7 +16,7 @@ from time import sleep
 
 class modem :
 
-    def __init__(self):
+    def __init__(self, port="/dev/ttyUSB1",sms_server="+33609001390"):
         self.ser = serial.Serial()
         self.ser.baudrate = 115200
         self.ser.bytesize = 8
@@ -25,7 +25,7 @@ class modem :
         self.ser.rtscts = True
         self.ser.timeout = 0
         self.ser.dsrdtr = True
-        self.ser.port = '/dev/ttyUSB1' #try different ports here, if this doesn't work.
+        self.ser.port = port #try different ports here, if this doesn't work.
         self.ser.parity=serial.PARITY_NONE
         self.ser.open()
         self.ser.write('\r')
@@ -33,7 +33,8 @@ class modem :
         self.read_write('AT+CMGF=1\r')
         ##following line of code sets the prefered message storage area to modem memory
         self.read_write('AT+CPMS="ME","ME","ME"\r')
-        self.read_write('AT+CSCA="+33609001390",145\r')
+        smsserverstr = 'AT+CSCA="'+sms_server+'",145\r'
+        self.read_write(smsserverstr)
         self.read_write('AT+CMGF=0\r')
 
     def read_write (self,data) :
@@ -65,7 +66,7 @@ class modem :
         self.read_write('AT+CMGF=1\r\n')
         self.read_write('AT+CMGS="%s"\r\n' % number)
         self.read_write('%s' % text)
-        self.read_write(ascii.ctrl('z'))
+        self.read_write('\x1A\r\n')
         print "Text: %s  \nhas been sent to: %s" %(text,number)
 
     def read_all_sms(self):
