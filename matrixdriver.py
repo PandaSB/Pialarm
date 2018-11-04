@@ -37,7 +37,7 @@ class matrix:
         return result
 
     def readkey (self):
-        self.key = ' '
+        self.key = ''
         self.matrix_device.write_cmd(MATRIX_COL1)
         sleep(0.0005)
         self.data = self.matrix_device.read ()

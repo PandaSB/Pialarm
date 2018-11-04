@@ -11,6 +11,7 @@ from pyA20.gpio import port
 from curses import ascii
 from myui import led 
 from myui import screen
+from myui import keyboard
 from mymodem import modem
 from mydetect import line
 
@@ -88,7 +89,7 @@ def display_page (lpage) :
     if lpage == 0 : 
         display.page0()
     elif lpage == 1 :
-        display.page1(state,operator,False,timeout)
+        display.page1(state,operator,menu,timeout)
     elif lpage == 2 :
         display.page2() 
     elif lpage == 3 :
@@ -127,6 +128,28 @@ def action () :
         # detection
         state +=0 # nothing to do 
 
+def KeyReceived (value , press) : 
+    global menu
+    global code
+    if press : 
+        if value == '*' :
+            menu = not menu
+        elif value == '#' :
+            print "code : " + code
+            print "code_allow : " + code_allow
+            print "state :" + str(state) 
+            if code == code_allow : 
+                if state == 0 :
+                    set_state ("1")
+                else :
+                    set_state ("0")
+            code = "" 
+        else :
+            code += value
+            if len(code) > 4 :
+                code = code[1:] 
+            print code 
+
 #Init 
 
 configfile_name = "/etc/alarm.conf"
@@ -138,6 +161,7 @@ if not os.path.isfile(configfile_name):
     Config.set('alarm', 'check_phone', False)
     Config.set('alarm', 'check_password', True)
     Config.set('alarm', 'passwd', 'Test')
+    Config.set('alarm', 'code', '1234')
     Config.set('alarm', 'phone', '+33600000000')
     Config.set('alarm', 'timeout','10')
     Config.set('alarm', 'state', '0')
@@ -159,8 +183,10 @@ with open(configfile_name) as f:
     password_allow     = config.get        ('alarm','passwd')
     state              = int (config.get   ('alarm','state'))
     default_timeout    = int (config.get   ('alarm','timeout'))
+    code_allow         = config.get        ('alarm','code')
     port               = config.get        ('modem', 'port')
     smsserver          = config.get        ('modem','sms_server')
+ 
     f.close()
 
 print "Configuration data"
@@ -175,6 +201,8 @@ print "  sms server         : " + smsserver
 
 timeout            = default_timeout
 page               = 1 
+code               = ""
+menu                = False
 
 gsmmodem = modem(port,smsserver)
 operator = gsmmodem.get_operator()
@@ -182,6 +210,9 @@ operator = gsmmodem.get_operator()
 blink = led()
 blink.setstate(state)
 blink.start()
+
+key = keyboard(KeyReceived)
+key.start()
 
 display = screen()
 sleep (1)
@@ -202,3 +233,4 @@ except KeyboardInterrupt:
     print ("Goodbye.")
     blink.stop()
     detectline.stop()
+    key.stop()

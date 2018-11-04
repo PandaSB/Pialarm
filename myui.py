@@ -48,22 +48,26 @@ class screen :
         self.str3 = "                    "
         if state == 0 :
             self.str2 = "** DISARMED **".center(20)
+            self.str3 = "Press code + '#'".center(20)
         elif state == 1 :
             self.str2 = "** DELAYED ARMED **".center(20)
             self.str3 = str(delay).center(20)
         elif state == 2 :
             self.str2 = "** ARMED **".center(20)
+            self.str3 = "Press code + '#'".center(20)
         elif state == 3 :
             self.str2 = "** DETECTION **".center(20)
             self.str3 = str(delay).center(20)
         elif state == 4 :
             self.str2 = "** ALARM ON **".center(20)
+            self.str3 = "Press code + '#'".center(20)
         else :
             self.str2 = "** ERROR **".center(20)    
         if (menu == True) : 
-            self.str4 = " 2 /24 8 /25"
+            self.str4 = " 2 \24 8 \25"
         else :
-            self.str4 = "* Menu              "
+            self.str4 = "* Menu ".ljust(16)
+
         self.lcd.lcd_display_string(self.str1, 1)
         self.lcd.lcd_display_string(self.str2, 2)
         self.lcd.lcd_display_string(self.str3, 3)
@@ -91,6 +95,38 @@ class screen :
         self.lcd.lcd_display_string(self.str, 4)
 
 
+class keyboard :
+    def __init__(self,callback=None):
+        self.matrix = matrixdriver.matrix()
+        self.oldkey = "-"
+        self.callback = callback 
+        self._loop = False
+
+
+    def start(self) :
+        self._loop = True 
+        self.tmaxtrix = threading.Thread(name='matrix', target=self.process_matrix)
+        self.tmaxtrix.start()
+
+    def process_matrix(self):
+        while self._loop:
+            check = self.matrix.checkkey()
+            if check:
+                self.key = self.matrix.readkey()
+                if self.key != self.oldkey : 
+                    if self.callback != None :
+                        self.callback(self.key,True)
+                self.oldkey = self.key
+            else : 
+                if  self.oldkey != "-" :
+                    if self.callback != None : 
+                        self.callback(self.oldkey,False)
+                self.oldkey = "-"
+
+    def stop (self):
+        self._loop = False
+    
+
 
 class led :
 
@@ -100,22 +136,11 @@ class led :
         self._loop = False
         gpio.init()
         gpio.setcfg(self._led, gpio.OUTPUT)
-        self.matrix = matrixdriver.matrix()
     
     def start(self):
         self._loop = True 
         self.tblink = threading.Thread(name='blink', target=self.process)
         self.tblink.start()
-        self.tmaxtrix = threading.Thread(name='matrix', target=self.process_matrix)
-        self.tmaxtrix.start()
-
-
-    def process_matrix(self):
-        while self._loop:
-            check = self.matrix.checkkey()
-            if check:
-                self.key = self.matrix.readkey()
-                print self.key
 
     def process(self):
         while self._loop:
