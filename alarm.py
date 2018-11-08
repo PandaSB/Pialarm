@@ -10,6 +10,7 @@ from pyA20.gpio import gpio
 from pyA20.gpio import port
 from curses import ascii
 from myui import led 
+from myui import buzzer
 from myui import screen
 from myui import keyboard
 from mymodem import modem
@@ -89,7 +90,7 @@ def display_page (lpage) :
     if lpage == 0 : 
         display.page0()
     elif lpage == 1 :
-        display.page1(state,operator,menu,timeout)
+        display.page1(state,operator,menu,timeout,code)
     elif lpage == 2 :
         display.page2() 
     elif lpage == 3 :
@@ -105,33 +106,39 @@ def action () :
     global timeout
     if   (state == 0) :
         # disarm
-        state += 0 # nothing to do 
+        state += 0 # nothing to do
+        blink.setstate(1) 
     elif (state == 1) :
         # delay arm
         if timeout > 0 :
             timeout -= 1; 
         if timeout == 0 :
             set_state("2")
+        blink.setstate(1)
     elif (state == 2) :
         # arm 
         if detectline.Isdetected() == True:
             print ("Zone 1 detected ")
             detectline.clear()
             set_state ("3")
+        blink.setstate(2)
     elif (state == 3) :
         # delay detection
         if timeout > 0 :
             timeout -= 1; 
         if timeout == 0 :
             set_state ("4")
+        blink.setstate(3) 
     elif (state == 4) :
         # detection
-        state +=0 # nothing to do 
+        state +=0 # nothing to do
+        blink.setstate(3)  
 
 def KeyReceived (value , press) : 
     global menu
     global code
     if press : 
+        bip.beep(0.2)
         if value == '*' :
             menu = not menu
         elif value == '#' :
@@ -210,6 +217,9 @@ operator = gsmmodem.get_operator()
 blink = led()
 blink.setstate(state)
 blink.start()
+
+bip = buzzer()
+
 
 key = keyboard(KeyReceived)
 key.start()

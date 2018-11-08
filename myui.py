@@ -38,7 +38,7 @@ class screen :
         self.lcd.lcd_display_string(self.str, 3)
         self.lcd.lcd_display_string(self.str, 4)
     
-    def page1(self,state=0,operator="None",menu=False,delay=0) : 
+    def page1(self,state=0,operator="None",menu=False,delay=0,code="") : 
         self.str1 = operator.ljust(19)
         self.indicator ^= True
         if self.indicator : 
@@ -64,9 +64,9 @@ class screen :
         else :
             self.str2 = "** ERROR **".center(20)    
         if (menu == True) : 
-            self.str4 = " 2 \24 8 \25"
+            self.str4 = "2/8 UP/DO 5/6 LF/RG"
         else :
-            self.str4 = "* Menu ".ljust(16)
+            self.str4 = "* Menu".ljust(16)+code.ljust(4)
 
         self.lcd.lcd_display_string(self.str1, 1)
         self.lcd.lcd_display_string(self.str2, 2)
@@ -127,6 +127,17 @@ class keyboard :
         self._loop = False
     
 
+class buzzer : 
+    def __init__ (self) : 
+        self._pin = port.PA6
+        gpio.init()
+        gpio.setcfg(self._pin, gpio.OUTPUT)
+        gpio.output(self._pin, 0)
+
+    def beep (self,time) : 
+        gpio.output(self._pin,1)
+        sleep (time)    
+        gpio.output(self._pin,0)
 
 class led :
 
@@ -136,6 +147,7 @@ class led :
         self._loop = False
         gpio.init()
         gpio.setcfg(self._led, gpio.OUTPUT)
+        gpio.output(self._led, 0)
     
     def start(self):
         self._loop = True 
@@ -151,6 +163,11 @@ class led :
                 gpio.output(self._led,1)
                 sleep(0.1)
             elif self._ledstate == 2:
+                gpio.output(self._led,1)
+                sleep(0.5)
+                gpio.output(self._led,0)
+                sleep(0.5)
+            elif self._ledstate == 3:
                 gpio.output(self._led, 1)
                 sleep(0.1)
                 gpio.output(self._led, 0)
@@ -166,5 +183,5 @@ class led :
     def stop (self):
         self._loop = False
 
-    def setstate (self, state):
+    def setstate (self, state=0):
         self._ledstate = state    

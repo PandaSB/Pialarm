@@ -66,6 +66,9 @@ class modem :
         self.read_write('AT+CMGF=1\r\n')
         self.read_write('AT+CMGS="%s"\r\n' % number)
         self.read_write('%s' % text)
+        sleep(0.2) 
+        self.read_write('\x1A\r\n')
+        sleep(0.2) 
         self.read_write('\x1A\r\n')
         print "Text: %s  \nhas been sent to: %s" %(text,number)
 
