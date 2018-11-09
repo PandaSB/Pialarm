@@ -112,3 +112,9 @@ class lcd:
    def lcd_clear(self):
       self.lcd_write(LCD_CLEARDISPLAY)
       self.lcd_write(LCD_RETURNHOME)
+   
+   def lcd_setcgram (self,addr,data) : 
+      lcd_command = LCD_SETCGRAMADDR | (addr << 3 ) 
+      self.lcd_write(lcd_command)
+      for char in data :
+            self.lcd_write(char,Rs)

@@ -90,7 +90,7 @@ def display_page (lpage) :
     if lpage == 0 : 
         display.page0()
     elif lpage == 1 :
-        display.page1(state,operator,menu,timeout,code)
+        display.page1(state,operator,menu,timeout,code,level)
     elif lpage == 2 :
         display.page2() 
     elif lpage == 3 :
@@ -157,6 +157,12 @@ def KeyReceived (value , press) :
                 code = code[1:] 
             print code 
 
+
+def timer_loop():
+    global refresh
+    refresh  = True
+    if refresh_loop_enable : threading.Timer(1, timer_loop).start()
+
 #Init 
 
 configfile_name = "/etc/alarm.conf"
@@ -209,10 +215,11 @@ print "  sms server         : " + smsserver
 timeout            = default_timeout
 page               = 1 
 code               = ""
-menu                = False
+menu               = False
+refresh            = False
+refresh_loop_enable = True 
 
 gsmmodem = modem(port,smsserver)
-operator = gsmmodem.get_operator()
 
 blink = led()
 blink.setstate(state)
@@ -228,19 +235,27 @@ display = screen()
 sleep (1)
 detectline = line()
 detectline.start()
+operator = ''
+
+timer_loop()
 
 try:
     print ("Press CTRL+C to exit")
     while True:
-        display_page (page) 
+        level = gsmmodem.get_level()
+        if level > 0 :
+            operator = gsmmodem.get_operator()
+        if (refresh == True) : 
+            refresh = False      
+            display_page (page) 
         action ()   
         smslist  = gsmmodem.read_unread_sms()
         if smslist :
             manage_sms (smslist)
             gsmmodem.delete_all_sms()
-        sleep(1)
 except KeyboardInterrupt:
     print ("Goodbye.")
     blink.stop()
     detectline.stop()
     key.stop()
+    refresh_loop_enable = False

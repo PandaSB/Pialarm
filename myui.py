@@ -38,13 +38,26 @@ class screen :
         self.lcd.lcd_display_string(self.str, 3)
         self.lcd.lcd_display_string(self.str, 4)
     
-    def page1(self,state=0,operator="None",menu=False,delay=0,code="") : 
-        self.str1 = operator.ljust(19)
+    def page1(self,state=0,operator="None",menu=False,delay=0,code="",level = 0) : 
+        self.str1 = operator
+        if level == 0 : # 0
+            self.lcd.lcd_setcgram ( 1 , [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00] )
+        elif level < 10 : # Marginal
+            self.lcd.lcd_setcgram ( 1 , [0x00,0x00,0x00,0x00,0x00,0x00,0x08,0x08] )
+        elif level < 15 : # OK
+            self.lcd.lcd_setcgram ( 1 , [0x00,0x00,0x00,0x00,0x04,0x04,0x0C,0x0C] )
+        elif level < 20 : # Good
+            self.lcd.lcd_setcgram ( 1 , [0x00,0x00,0x02,0x02,0x06,0x06,0x0E,0x0E] )
+        else :  # Excelent
+            self.lcd.lcd_setcgram ( 1 , [0x01,0x01,0x03,0x03,0x07,0x07,0x0F,0x1F] )
+        self.str1 += " ["+chr(1) + "]"
+        self.str1 = self.str1.rjust(19)
+
         self.indicator ^= True
         if self.indicator : 
-            self.str1 += "-"
+            self.str1 = "-" + self.str1
         else :
-            self.str1 += "|"
+            self.str1 = "|" + self.str1
         self.str3 = "                    "
         if state == 0 :
             self.str2 = "** DISARMED **".center(20)

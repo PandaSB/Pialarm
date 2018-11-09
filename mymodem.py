@@ -63,13 +63,10 @@ class modem :
         return self.answer
 
     def sendsms(self,number,text):
+        text_end = text + chr(26)
         self.read_write('AT+CMGF=1\r\n')
         self.read_write('AT+CMGS="%s"\r\n' % number)
-        self.read_write('%s' % text)
-        sleep(0.2) 
-        self.read_write('\x1A\r\n')
-        sleep(0.2) 
-        self.read_write('\x1A\r\n')
+        self.read_write(text_end)
         print "Text: %s  \nhas been sent to: %s" %(text,number)
 
     def read_all_sms(self):
@@ -146,10 +143,17 @@ class modem :
     def get_operator(self):
         a= self.read_write('AT+COPS?\r').replace('\"','')
         r=a.split(",")
-        return r[2]
+        if len(r) > 2 : 
+            return r[2]
+        else :
+            return ''
 
     def get_level(self):
         a=self.read_write ("AT+CSQ\r")
         r = a.split()
-        s = r[2].split(",")
-        return s[0]
+        result = 0
+        if len(r) > 2 : 
+            s = r[2].split(",")
+            if len (s) > 1 : 
+                result = int (s[0])
+        return result
